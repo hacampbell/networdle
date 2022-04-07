@@ -6,6 +6,3 @@ javac src/server/Entrypoint.java
 
 echo Running Server...
 java src/server/Entrypoint $1
-
-
-rm src/server/*.class
