@@ -19,4 +19,16 @@ public class Utils {
         System.out.println("\n[ERROR] " + message);
         System.out.println();
     }
+
+    /**
+     * A utilty function used for printing an error to standard out as well
+     * as its associated exceptions error message.
+     * @param message - The message to be displayed
+     * @param e - The associated exception with the error
+     */
+    public static void error (String message, Exception e) {
+        System.out.println("\n[ERROR] " + message);
+        System.out.println("\tThe error was:\n\t\t" + e.getMessage());
+        System.out.println();
+    }
 }
