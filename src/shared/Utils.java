@@ -10,4 +10,13 @@ public class Utils {
         System.out.println("\n[ERROR] " + message);
         System.exit(1);
     }
+
+    /**
+     * A ultilty function used for printing an error to standard out.
+     * @param message - The error message
+     */
+    public static void error (String message) {
+        System.out.println("\n[ERROR] " + message);
+        System.out.println();
+    }
 }
