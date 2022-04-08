@@ -12,6 +12,10 @@ public class NetwordleGame extends Thread{
     private BufferedReader reader;
     private String cAddress;
 
+    /**
+     * Constructor for the NetWordleGame class.
+     * @param client - The client the game has been created for
+     */
     public NetwordleGame (Socket client) {
         try {
             this.client = client;
