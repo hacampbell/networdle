@@ -11,7 +11,18 @@ public class ProtocolHandler {
      */
     public static byte[] encodeMessage (String str) {
         String data = str + "\n";
-        byte[] msg = data.getBytes(StandardCharsets.UTF_8);
+        byte[] msg = data.getBytes(StandardCharsets.US_ASCII);
         return msg;
+    }
+
+    /**
+     * Converts a Protocol compliant message to a string i.e. a series of ASCII
+     * values to a string.
+     * @param msg - The protocol message to be decoded
+     * @return - The decoded string
+     */
+    public static String decodeMessage (byte[] msg) {
+        String str = new String(msg, StandardCharsets.US_ASCII);
+        return str;
     }
 }
