@@ -1,4 +1,4 @@
-package src.server;
+package src.shared;
 
 import java.nio.charset.StandardCharsets;
 
