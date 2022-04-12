@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.file.Files;
@@ -57,6 +58,10 @@ public class NetwordleGame extends Thread{
             client.getOutputStream().write(ProtocolHandler.encodeMessage("START GAME"));
             client.getOutputStream().write(ProtocolHandler.encodeMessage(targetWord));
 
+            // Read some stuff
+            String message = this.reader.readLine();
+            writeMessage(message);
+
         } catch (Exception e) {
             Utils.error("An error occured trying to create client at: " +
                         cAddress, e);
@@ -93,6 +98,23 @@ public class NetwordleGame extends Thread{
         }
 
         return target; 
+    }
+
+    /**
+     * Sends a protocol compliant message to the client.
+     * @param message - The message to send to the client
+     */
+    private void writeMessage (String message) {
+        try {
+            OutputStream cOS = client.getOutputStream();
+            byte[] encoded = ProtocolHandler.encodeMessage(message);
+            cOS.write(encoded);
+        } catch (IOException e) {
+            Utils.error(
+                "Error trying to send message from client " + cAddress, 
+                e
+            );
+        }  
     }
 
 }
