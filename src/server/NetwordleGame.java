@@ -20,6 +20,7 @@ public class NetwordleGame extends Thread{
     private BufferedReader reader;
     private String cAddress;
     private String targetWord;
+    private boolean gameActive;
 
     /**
      * Constructor for the NetWordleGame class.
@@ -37,6 +38,9 @@ public class NetwordleGame extends Thread{
 
             // Steup for Print Writer
             this.writer = new PrintWriter(client.getOutputStream(), true);
+
+            // Set the game state to active
+            this.gameActive = true;
             
         } catch (IOException e) {
             Utils.error("Unable to create new Networdle Game.", e);
@@ -58,9 +62,12 @@ public class NetwordleGame extends Thread{
             client.getOutputStream().write(ProtocolHandler.encodeMessage("START GAME"));
             client.getOutputStream().write(ProtocolHandler.encodeMessage(targetWord));
 
-            // Read some stuff
-            String message = this.reader.readLine();
-            writeMessage(message);
+            // Main game loop
+            while (gameActive) {
+                // Read some stuff
+                String message = this.reader.readLine();
+                checkGameMessage(message);
+            }
 
         } catch (Exception e) {
             Utils.error("An error occured trying to create client at: " +
@@ -101,6 +108,20 @@ public class NetwordleGame extends Thread{
     }
 
     /**
+     * Wrapper function for closing the client socket and setting the game
+     * state to inactive.
+     */
+    private void closeClient () {
+        try {
+            this.client.close();
+            this.gameActive = false;
+        } catch (IOException e) {
+            Utils.error("Error closing client " + cAddress, e);
+            this.gameActive = false;
+        }
+    }
+
+    /**
      * Sends a protocol compliant message to the client.
      * @param message - The message to send to the client
      */
@@ -110,11 +131,21 @@ public class NetwordleGame extends Thread{
             byte[] encoded = ProtocolHandler.encodeMessage(message);
             cOS.write(encoded);
         } catch (IOException e) {
+            // Display the error and then close the associated client
             Utils.error(
-                "Error trying to send message from client " + cAddress, 
+                "Error trying to send message to client " + cAddress, 
                 e
             );
+            closeClient();
         }  
+    }
+
+    /**
+     * The main function for managing the game and guesses made by the client.
+     * @param message - The message sent to the server by the client
+     */
+    private void checkGameMessage (String message) {
+        writeMessage(message);
     }
 
 }
