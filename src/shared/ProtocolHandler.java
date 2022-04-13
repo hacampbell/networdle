@@ -36,7 +36,9 @@ public class ProtocolHandler {
      */
     public static String decodeMessage (byte[] msg) {
         String str = new String(msg, StandardCharsets.US_ASCII);
-        return str;
+        String chop = str.substring(0, str.length() - 1); // Drop the /n
+        System.out.println(chop);
+        return chop;
     }
 
     /**
@@ -73,11 +75,11 @@ public class ProtocolHandler {
         switch (ctl) {
             case CLIENT_START_GAME:
                 return isValidProtocolMessage(msg) 
-                        && decodeMessage(msg) == "START GAME";
+                        && decodeMessage(msg).equals("START GAME");
 
             case SERVER_END_GAME:
                 return isValidProtocolMessage(msg) 
-                        && decodeMessage(msg) == "GAME OVER";
+                        && decodeMessage(msg).equals("GAME OVER");
             
             default:
                 return false;
