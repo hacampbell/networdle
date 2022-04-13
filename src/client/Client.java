@@ -131,7 +131,7 @@ public class Client {
             cOS.write(encoded);
         } catch (IOException e) {
             // Display the error and then close the connection.
-            Utils.error("Error sending message to serce", e );
+            Utils.error("Error sending message to server", e);
             disconnectFromServer(conn);
         }  
     }
