@@ -3,9 +3,8 @@ package src.server;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -15,9 +14,9 @@ import src.shared.ProtocolHandler;
 import src.shared.Utils;
 
 public class NetwordleGame extends Thread{
+    private final int MAX_BYTES = 256;
+
     private Socket client;
-    private PrintWriter writer;
-    private BufferedReader reader;
     private String cAddress;
     private String targetWord;
     private boolean gameActive;
@@ -27,25 +26,10 @@ public class NetwordleGame extends Thread{
      * @param client - The client the game has been created for
      */
     public NetwordleGame (Socket client) {
-        try {
-            this.client = client;
-            this.cAddress = client.getLocalSocketAddress().toString();
-            this.targetWord = selectTargetWord();
-
-            // Setup for Buffered Reader
-            InputStreamReader in = new InputStreamReader(client.getInputStream());
-            this.reader = new BufferedReader(in);
-
-            // Steup for Print Writer
-            this.writer = new PrintWriter(client.getOutputStream(), true);
-
-            // Set the game state to active
-            this.gameActive = true;
-            
-        } catch (IOException e) {
-            Utils.error("Unable to create new Networdle Game.", e);
-            
-        }
+        this.client = client;
+        this.cAddress = client.getLocalSocketAddress().toString();
+        this.targetWord = selectTargetWord();
+        this.gameActive = true;
     }
 
     /**
@@ -53,25 +37,20 @@ public class NetwordleGame extends Thread{
      */
     public void run () {
         try {
-            // Write some generic test data. This isn't Protocol Compliant and
-            // needs to be removed before submission.
-            writer.println("Welcome to the server!");
-            writer.println("You are client: " + cAddress);
-
             // Test writing something using the protocol specifications.
-            client.getOutputStream().write(ProtocolHandler.encodeMessage("START GAME"));
             client.getOutputStream().write(ProtocolHandler.encodeMessage(targetWord));
 
             // Main game loop
             while (gameActive) {
-                // Read some stuff
-                String message = this.reader.readLine();
+                byte[] message = readMessage();
                 checkGameMessage(message);
             }
 
         } catch (Exception e) {
-            Utils.error("An error occured trying to create client at: " +
+            // If there's an error, display it and kill the client.
+            Utils.error("An error occured during execution for client: " +
                         cAddress, e);
+            closeClient();
         }
     }
 
@@ -141,11 +120,45 @@ public class NetwordleGame extends Thread{
     }
 
     /**
+     * Reads messages from the client and returns them as a byte array.
+     * Because data is sent over the network as an array of bytes, this
+     * function trims the data down into just what was intended to be sent by
+     * the client.
+     * @return - The message from the client as an array of bytes
+     */
+    private byte[] readMessage () {
+        try {
+            InputStream stream = client.getInputStream();
+            byte[] rawData = new byte[MAX_BYTES];
+            int count = stream.read(rawData);
+
+            byte[] trimmedData = new byte[count];
+
+            for (int i = 0; i < count; i++) {
+                trimmedData[i] = rawData[i];
+            }
+
+            return trimmedData;
+        } catch (IOException e) {
+            // Display the error and then close the associated client
+            Utils.error(
+                "Error trying to read message from client " + cAddress, 
+                e
+            );
+            closeClient();
+        }
+
+        return null;
+    }
+
+    /**
      * The main function for managing the game and guesses made by the client.
      * @param message - The message sent to the server by the client
      */
-    private void checkGameMessage (String message) {
-        writeMessage(message);
+    private void checkGameMessage (byte[] message) {
+        for (byte b: message) System.out.println(b);
+        System.out.println(ProtocolHandler.isValidProtocolMessage(message));
+        writeMessage("message");
     }
 
 }
