@@ -11,7 +11,7 @@ public class ProtocolHandler {
      * sends a valid START GAME message to begin the game, or that the server
      * sends a valid GAME OVER message.
      */
-    enum ControlMessage {
+    public enum ControlMessage {
         CLIENT_START_GAME,
         SERVER_END_GAME
     }
@@ -59,5 +59,28 @@ public class ProtocolHandler {
         }
 
         return isValid;
+    }
+
+    /**
+     * Checks that a given control message for the game is valid. For example,
+     * that the client sent a valid START GAME message, or that that the server
+     * sent a valid GAME OVER message.
+     * @param msg - The message sent by the client
+     * @param ctl - The type of control message to check
+     * @return
+     */
+    public static boolean isValidControlMessage (byte[] msg, ControlMessage ctl) {
+        switch (ctl) {
+            case CLIENT_START_GAME:
+                return isValidProtocolMessage(msg) 
+                        && decodeMessage(msg) == "START GAME";
+
+            case SERVER_END_GAME:
+                return isValidProtocolMessage(msg) 
+                        && decodeMessage(msg) == "GAME OVER";
+            
+            default:
+                return false;
+        }
     }
 }
