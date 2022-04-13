@@ -1,5 +1,7 @@
 package src.client;
 
+import java.net.Socket;
+
 import src.shared.Utils;
 
 public class Client {
@@ -8,18 +10,15 @@ public class Client {
         String address;
         int port;
 
-        for (String s: args) {
-            System.out.println(s);
-        }
-
         // Check that we've been given the right arguments
         checkArgs(args);
 
-        // Set address
+        // Set address and port
         address = args[0];
-
-        // Check and set port number
         port = processPort(args[1]);
+
+        // Connect to the server
+        Socket connection = connectToServer(address, port);
     }
 
     /**
@@ -54,5 +53,27 @@ public class Client {
         }
 
         return port;
+    }
+
+    /**
+     * Connects to to a server at a given address and port.
+     * @param address - The address of the host to connect to
+     * @param port - The port of the host to connect to
+     * @return - A socket which is the connection to the given host
+     */
+    private static Socket connectToServer (String address, int port) {
+        Socket conn = null;
+
+        // Attempt to make a connection.
+        try {
+            conn = new Socket(address, port);
+        } catch (Exception e) {
+            Utils.errorAndDie(
+                "Unable to connect to server. " + 
+                "Please double check you're using the correct address and port"
+            );
+        }
+
+        return conn;
     }
 }
