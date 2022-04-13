@@ -1,5 +1,6 @@
 package src.client;
 
+import java.io.IOException;
 import java.net.Socket;
 
 import src.shared.Utils;
@@ -19,6 +20,9 @@ public class Client {
 
         // Connect to the server
         Socket connection = connectToServer(address, port);
+
+        // Disconnect when we're done
+        disconnectFromServer(connection);
     }
 
     /**
@@ -75,5 +79,20 @@ public class Client {
         }
 
         return conn;
+    }
+
+    /**
+     * Closes the connection to the server
+     * @param conn - The socket connection to the server
+     */
+    private static void disconnectFromServer (Socket conn) {
+        try {
+            conn.close();
+        } catch (IOException e) {
+            Utils.errorAndDie(
+                "An error occured while disconnecting from the server:\n" +
+                e.getMessage()
+            );
+        }
     }
 }
