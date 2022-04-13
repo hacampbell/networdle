@@ -3,6 +3,19 @@ package src.shared;
 import java.nio.charset.StandardCharsets;
 
 public class ProtocolHandler {
+
+    /**
+     * Enum used to store the differnt types of control messages used in the
+     * game and for when checking if a given control message sent by either
+     * the server or client is valid. For example, checking that the client
+     * sends a valid START GAME message to begin the game, or that the server
+     * sends a valid GAME OVER message.
+     */
+    enum ControlMessage {
+        CLIENT_START_GAME,
+        SERVER_END_GAME
+    }
+
     /**
      * Converts a string to a Protocol complian message i.e. to a series of
      * ASCII values ending with the line feed character.
