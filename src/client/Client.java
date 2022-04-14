@@ -177,6 +177,12 @@ public class Client {
         return null;
     }
 
+    /**
+     * Checks that the first message sent by the server to the client is valid
+     * by the rules of the networdle protocol. I.e. The first 
+     * @param msg
+     * @return
+     */
     private static boolean isValidServerInit (byte[] msg) {
         return ProtocolHandler.isValidControlMessage(msg, ControlMessage.SERVER_START_GAME_RESPONSE);
     }
