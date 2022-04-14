@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.util.Random;
 
 import src.shared.ProtocolHandler;
+import src.shared.ProtocolHandler.ControlMessage;
 import src.shared.Utils;
 
 public class NetwordleGame extends Thread{
@@ -29,7 +30,7 @@ public class NetwordleGame extends Thread{
         this.client = client;
         this.cAddress = client.getLocalSocketAddress().toString();
         this.targetWord = selectTargetWord();
-        this.gameActive = true;
+        System.out.printf("Word for %s is %s\n", cAddress, targetWord);
     }
 
     /**
@@ -37,8 +38,24 @@ public class NetwordleGame extends Thread{
      */
     public void run () {
         try {
-            // Test writing something using the protocol specifications.
-            client.getOutputStream().write(ProtocolHandler.encodeMessage(targetWord));
+            // Check that we're sent a START GAME message from the client
+            byte[] initMessage = readMessage();
+            if (ProtocolHandler.isValidControlMessage(initMessage, 
+                ControlMessage.CLIENT_START_GAME)) 
+            {
+                this.gameActive = true;
+            } else {
+                // If we don't get a valid START GAME message, close the client
+                // and exit this wordle game.
+                System.out.println("Client sent bad START GAME message");
+                closeClient();
+                return;
+            }
+
+            this.gameActive = true;
+
+            // Send the first hint
+            writeMessage("_____");
 
             // Main game loop
             while (gameActive) {
@@ -156,8 +173,6 @@ public class NetwordleGame extends Thread{
      * @param message - The message sent to the server by the client
      */
     private void checkGameMessage (byte[] message) {
-        for (byte b: message) System.out.println(b);
-        System.out.println(ProtocolHandler.isValidProtocolMessage(message));
         writeMessage("message");
     }
 
