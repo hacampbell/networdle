@@ -1,6 +1,7 @@
 package src.client;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Scanner;
@@ -33,10 +34,13 @@ public class Client {
         // Send message to start the game.
         writeMessage("START GAME", connection);
 
+        // TODO: Check the servers response is Protocol compliant
+
         while (gameActive) {
             // Read response from server
-            String resp = readMessage(connection);
-            System.out.println(resp);
+            byte[] resp = readMessage(connection);
+            String data = ProtocolHandler.decodeMessage(resp);
+            System.out.println(data);
 
             // Read data from client input
             String message = input.nextLine();
@@ -136,20 +140,25 @@ public class Client {
         }  
     }
 
-    private static String readMessage (Socket conn) {
-        byte[] resp = new byte[MAX_BYTES];
-        String msg = "";
-
+    private static byte[] readMessage (Socket conn) {
         try {
-            conn.getInputStream().read(resp);
-            msg = ProtocolHandler.decodeMessage(resp);
+            InputStream stream = conn.getInputStream();
+            byte[] rawData = new byte[MAX_BYTES];
+            int count = stream.read(rawData);
+
+            byte[] trimmedData = new byte[count];
+
+            for (int i = 0; i < count; i++) {
+                trimmedData[i] = rawData[i];
+            }
+
+            return trimmedData;
         } catch (IOException e) {
-            // display the error and then close the connection
-            Utils.error("Error reading message from server.", e);
+            // Display the error and then close the associated client
+            Utils.error("Error reading message rom server", e);
             disconnectFromServer(conn);
         }
 
-
-        return msg;
+        return null;
     }
 }
