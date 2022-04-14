@@ -31,4 +31,13 @@ public class Utils {
         System.out.println("\tThe error was:\n\t\t" + e.getMessage());
         System.out.println();
     }
+
+    /**
+     * A utility function used for printing an info message to standard out
+     * @param message - The message to be displayed
+     */
+    public static void info (String message) {
+        System.out.println("\n[INFO] " + message);
+        System.out.println();
+    }
 }
