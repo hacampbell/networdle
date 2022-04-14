@@ -3,6 +3,12 @@ package src.shared;
 import java.nio.charset.StandardCharsets;
 
 public class ProtocolHandler {
+    // Constants to be used throughout the project as control messages
+    public static final String START_GAME = "START GAME";
+    public static final String START_RESPONSE = "_____";
+    public static final String INVALID_GUESS = "INVALID GUESS";
+    public static final String END_GAME = "GAME OVER";
+
 
     /**
      * Enum used to store the differnt types of control messages used in the
@@ -75,15 +81,15 @@ public class ProtocolHandler {
         switch (ctl) {
             case CLIENT_START_GAME:
                 return isValidProtocolMessage(msg) 
-                        && decodeMessage(msg).equals("START GAME");
+                        && decodeMessage(msg).equals(START_GAME);
 
             case SERVER_START_GAME_RESPONSE:
                 return isValidProtocolMessage(msg)
-                        && decodeMessage(msg).equals("_____");
+                        && decodeMessage(msg).equals(START_RESPONSE); 
 
             case SERVER_END_GAME:
                 return isValidProtocolMessage(msg) 
-                        && decodeMessage(msg).equals("GAME OVER");
+                        && decodeMessage(msg).equals(END_GAME);
             
             default:
                 return false;
