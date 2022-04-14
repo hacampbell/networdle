@@ -13,6 +13,7 @@ public class ProtocolHandler {
      */
     public enum ControlMessage {
         CLIENT_START_GAME,
+        SERVER_START_GAME_RESPONSE,
         SERVER_END_GAME
     }
 
@@ -75,6 +76,10 @@ public class ProtocolHandler {
             case CLIENT_START_GAME:
                 return isValidProtocolMessage(msg) 
                         && decodeMessage(msg).equals("START GAME");
+
+            case SERVER_START_GAME_RESPONSE:
+                return isValidProtocolMessage(msg)
+                        && decodeMessage(msg).equals("_____");
 
             case SERVER_END_GAME:
                 return isValidProtocolMessage(msg) 
