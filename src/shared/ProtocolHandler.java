@@ -37,7 +37,6 @@ public class ProtocolHandler {
     public static String decodeMessage (byte[] msg) {
         String str = new String(msg, StandardCharsets.US_ASCII);
         String chop = str.substring(0, str.length() - 1); // Drop the /n
-        System.out.println(chop);
         return chop;
     }
 
