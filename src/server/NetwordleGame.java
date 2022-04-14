@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.Random;
 
 import src.shared.ProtocolHandler;
@@ -17,10 +18,12 @@ import src.shared.Utils;
 public class NetwordleGame extends Thread{
     private final int MAX_BYTES = 256;
 
-    private Socket client;
-    private String cAddress;
-    private String targetWord;
-    private boolean gameActive;
+    private Socket client;              // The socket connection to the client
+    private String cAddress;            // The clients IP address for logging
+    private String targetWord;          // The word for the client to guess
+    private boolean gameActive;         // The active state of the game
+    private Integer guessCount;         // The clients number fo guesses
+    private HashSet<String> guessList;  // The list of valid guesses to be made
 
     /**
      * Constructor for the NetWordleGame class.
@@ -30,6 +33,9 @@ public class NetwordleGame extends Thread{
         this.client = client;
         this.cAddress = client.getLocalSocketAddress().toString();
         this.targetWord = selectTargetWord();
+        this.guessList = loadGuessList();
+        this.guessCount = 0;
+
         System.out.printf("Word for %s is %s\n", cAddress, targetWord);
     }
 
@@ -58,7 +64,7 @@ public class NetwordleGame extends Thread{
             // Main game loop
             while (gameActive) {
                 byte[] message = readMessage();
-                checkGameMessage(message);
+                checkGuess(message);
             }
 
         } catch (Exception e) {
@@ -99,6 +105,29 @@ public class NetwordleGame extends Thread{
         }
 
         return target; 
+    }
+
+    /**
+     * Gets the list of valid guesses a client can make and returns it as a
+     * hasset for fast lookup.
+     * @return - A hashset containing the valid guesses a client can make.
+     */
+    private HashSet<String> loadGuessList () {
+        final String targetPath = "./resources/guess.txt";
+        HashSet<String> guessList = new HashSet<String>();
+
+        // Read each guess from the file and add it to the hashset.
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(targetPath));
+            for(String line; (line = br.readLine()) != null;) {
+                guessList.add(line);
+            }
+            br.close();
+        }catch (Exception e) {
+            Utils.errorAndDie("Error trying to read guess list.");
+        }
+
+        return guessList;
     }
 
     /**
@@ -170,7 +199,7 @@ public class NetwordleGame extends Thread{
      * The main function for managing the game and guesses made by the client.
      * @param message - The message sent to the server by the client
      */
-    private void checkGameMessage (byte[] message) {
+    private void checkGuess (byte[] message) {
         writeMessage("message");
     }
 
