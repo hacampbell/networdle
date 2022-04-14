@@ -52,8 +52,6 @@ public class NetwordleGame extends Thread{
                 return;
             }
 
-            this.gameActive = true;
-
             // Send the first hint
             writeMessage("_____");
 
