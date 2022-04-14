@@ -32,7 +32,7 @@ public class Client {
         Socket connection = connectToServer(address, port);
 
         // Send message to start the game.
-        writeMessage("START GAME", connection);
+        writeMessage(ProtocolHandler.START_GAME, connection);
 
         // Check that the server responds correctly to a new game bring started
         byte[] initMessage = readMessage(connection);
