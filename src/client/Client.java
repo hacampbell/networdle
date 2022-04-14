@@ -8,22 +8,22 @@ import java.util.Scanner;
 
 import src.shared.ProtocolHandler;
 import src.shared.Utils;
+import src.shared.ProtocolHandler.ControlMessage;
 
 public class Client {
 
     private static final int MAX_BYTES = 256;
 
     public static void main(String[] args) {
-        String address;
-        int port;
-        boolean gameActive = true;
-
         // Check that we've been given the right arguments
         checkArgs(args);
 
+        boolean gameActive = true;
+        //boolean serverResponse = false;
+
         // Set address and port
-        address = args[0];
-        port = processPort(args[1]);
+        String address = args[0];
+        int port = processPort(args[1]);
 
         // Setup scanner to read user input.
         Scanner input = new Scanner(System.in);
@@ -34,17 +34,25 @@ public class Client {
         // Send message to start the game.
         writeMessage("START GAME", connection);
 
-        // TODO: Check the servers response is Protocol compliant
+        // Check that the server responds correctly to a new game bring started
+        byte[] initMessage = readMessage(connection);
+        if (isValidServerInit(initMessage)) {
+            gameActive = true;
+            System.out.println(ProtocolHandler.decodeMessage(initMessage));
+        } else {
+            Utils.error("Invalid game init from server.");
+        }
 
+        // Main game loop
         while (gameActive) {
+            // Read data from client input
+            String message = input.nextLine();
+            writeMessage(message, connection);
+
             // Read response from server
             byte[] resp = readMessage(connection);
             String data = ProtocolHandler.decodeMessage(resp);
             System.out.println(data);
-
-            // Read data from client input
-            String message = input.nextLine();
-            writeMessage(message, connection);
         }
 
         // Disconnect when we're done, close the scanner
@@ -140,6 +148,13 @@ public class Client {
         }  
     }
 
+    /**
+     * Reads messages from the server and returns them as a byte array.
+     * Because data is sent over the network as an array of bytes, this
+     * function trims the data down into just what was intended to be sent by
+     * the server.
+     * @return - The message from the client as an array of bytes
+     */
     private static byte[] readMessage (Socket conn) {
         try {
             InputStream stream = conn.getInputStream();
@@ -160,5 +175,9 @@ public class Client {
         }
 
         return null;
+    }
+
+    private static boolean isValidServerInit (byte[] msg) {
+        return ProtocolHandler.isValidControlMessage(msg, ControlMessage.SERVER_START_GAME_RESPONSE);
     }
 }
