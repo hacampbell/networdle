@@ -59,7 +59,7 @@ public class NetwordleGame extends Thread{
             }
 
             // Send the first hint
-            writeMessage("_____");
+            writeMessage(ProtocolHandler.START_RESPONSE);
 
             // Main game loop
             while (gameActive) {
@@ -200,7 +200,16 @@ public class NetwordleGame extends Thread{
      * @param message - The message sent to the server by the client
      */
     private void checkGuess (byte[] message) {
-        writeMessage("message");
+        // Check that the message the client sent adheres to the protocol. If
+        // not, drop the client.
+        if (!ProtocolHandler.isValidProtocolMessage(message)) {
+            this.gameActive = false;
+            closeClient();
+            return;
+        }
+
+        writeMessage("You made a guess!");
+
     }
 
 }
