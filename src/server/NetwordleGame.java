@@ -208,6 +208,37 @@ public class NetwordleGame extends Thread{
     }
 
     /**
+     * Generates a new hint for a given guess
+     * @param guess - The guess to generate a hint for
+     * @return - The hint for a given guess
+     */
+    private String generateHint (String guess) {
+
+        //TODO: Fix this. This code does not adhere to game rule 2 properly.
+        // E.g. Say the word is table and the guess is trout, both T's will
+        // appear in the hint, which is wrong. Only one should. This is also
+        // broken for double letters.
+        String hint = "";
+        boolean[] matched = new boolean[targetWord.length()]; 
+
+        //Loop through each character in the guess
+        for (int i = 0; i < guess.length(); i++) {
+            char guessLetter = guess.charAt(i);
+            char targetLetter = targetWord.charAt(i);
+
+            if (guessLetter == targetLetter) {
+                hint += guessLetter;
+            } else if (guessLetter != targetLetter && targetWord.contains("" + guessLetter)) {
+                hint += Character.toLowerCase(guessLetter);
+            } else {
+                hint += "_";
+            }
+        }
+
+        return hint;
+    }
+
+    /**
      * The main function for managing the game and guesses made by the client.
      * @param message - The message sent to the server by the client
      */
@@ -250,7 +281,8 @@ public class NetwordleGame extends Thread{
             return;
         }
 
-        writeMessage("You made a guess!");
+        String hint = generateHint(guess);
+        writeMessage(hint);
 
     }
 
