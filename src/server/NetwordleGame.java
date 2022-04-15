@@ -198,6 +198,16 @@ public class NetwordleGame extends Thread{
     }
 
     /**
+     * Checks if a word guess is valid. That is, checks if a given guess is
+     * contained in the guess list.
+     * @param guess - The guess to check for validity
+     * @return - True if the guess is in the guess list, otherwise false.
+     */
+    private boolean isValidGuess (String guess) {
+        return guessList.contains(guess);
+    }
+
+    /**
      * The main function for managing the game and guesses made by the client.
      * @param message - The message sent to the server by the client
      */
