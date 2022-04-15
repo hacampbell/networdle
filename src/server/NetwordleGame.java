@@ -235,6 +235,21 @@ public class NetwordleGame extends Thread{
             return;
         }
 
+        // A valid guess has been made, increment the guess count.
+        this.guessCount++;
+
+        // Check if the user got the correct word
+        if (guess.equals(this.targetWord)) {
+            writeMessage(this.guessCount.toString() + "\n" + ProtocolHandler.END_GAME);
+            Utils.info(
+                this.cAddress + " correctly guessed the target word after " +
+                this.guessCount + " guesses. \n\tDisconnecting client."
+            );
+            this.gameActive = false;
+            closeClient();
+            return;
+        }
+
         writeMessage("You made a guess!");
 
     }
