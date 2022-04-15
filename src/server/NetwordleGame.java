@@ -225,6 +225,16 @@ public class NetwordleGame extends Thread{
             return;
         }
 
+        // Once we know we've got a valid protocol message, convert it to an
+        // uppercase string for use in other functions.
+        String guess = ProtocolHandler.decodeMessage(message).toUpperCase();
+
+        // Check that the client made a valid guess
+        if (!isValidGuess(guess)) {
+            writeMessage(ProtocolHandler.INVALID_GUESS);
+            return;
+        }
+
         writeMessage("You made a guess!");
 
     }
