@@ -36,7 +36,8 @@ public class NetwordleGame extends Thread{
         this.guessList = loadGuessList();
         this.guessCount = 0;
 
-        System.out.printf("Word for %s is %s\n", cAddress, targetWord);
+        Utils.info("Client " + cAddress + " connected. Target word is " 
+                    + targetWord);
     }
 
     /**
@@ -53,7 +54,8 @@ public class NetwordleGame extends Thread{
             } else {
                 // If we don't get a valid START GAME message, close the client
                 // and exit this wordle game.
-                System.out.println("Client sent bad START GAME message");
+                Utils.info("Dropping client " + cAddress 
+                            + "due to bad START GAME message");
                 closeClient();
                 return;
             }
@@ -203,6 +205,11 @@ public class NetwordleGame extends Thread{
         // Check that the message the client sent adheres to the protocol. If
         // not, drop the client.
         if (!ProtocolHandler.isValidProtocolMessage(message)) {
+            Utils.info(
+                "Dropping Client " 
+                + cAddress + 
+                " due to sending a message that wasn't protocol compliant."
+            );
             this.gameActive = false;
             closeClient();
             return;
