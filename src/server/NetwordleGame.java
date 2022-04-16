@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 
@@ -208,34 +209,84 @@ public class NetwordleGame extends Thread{
     }
 
     /**
+     * Gets the indexes of all occurances of a character in a string
+     * @param word - The word to get the char indexes from
+     * @param ch - The char to get the indexes of
+     * @return - An array containing the index of the char occurances
+     */
+    private Integer[] getIndexesOfChar (String word, char ch) {
+        ArrayList<Integer> indexes = new ArrayList<Integer>();
+
+        for(int i = 0; i < word.length(); i++){
+            if(word.charAt(i) == ch){
+               indexes.add(i);
+            }
+        }
+
+        Integer[] data = new Integer[indexes.size()];
+        data = indexes.toArray(data);
+        return data;
+    }
+
+    /**
      * Generates a new hint for a given guess
      * @param guess - The guess to generate a hint for
      * @return - The hint for a given guess
      */
     private String generateHint (String guess) {
+        StringBuilder hintBuilder = new StringBuilder(targetWord.length());
+        boolean[] matched = new boolean[targetWord.length()];
 
-        //TODO: Fix this. This code does not adhere to game rule 2 properly.
-        // E.g. Say the word is table and the guess is trout, both T's will
-        // appear in the hint, which is wrong. Only one should. This is also
-        // broken for double letters.
-        String hint = "";
-        boolean[] matched = new boolean[targetWord.length()]; 
+        // Set the hint to all underscores to begin with
+        hintBuilder.append(ProtocolHandler.START_RESPONSE);
 
-        //Loop through each character in the guess
-        for (int i = 0; i < guess.length(); i++) {
-            char guessLetter = guess.charAt(i);
-            char targetLetter = targetWord.charAt(i);
+        // Loop through, set all correct letters in the hint.
+        for (int i = 0; i < targetWord.length(); i++) {
+            char gLtr = guess.charAt(i);
+            char tLtr = targetWord.charAt(i);
 
-            if (guessLetter == targetLetter) {
-                hint += guessLetter;
-            } else if (guessLetter != targetLetter && targetWord.contains("" + guessLetter)) {
-                hint += Character.toLowerCase(guessLetter);
-            } else {
-                hint += "_";
+            if (gLtr == tLtr) {
+                hintBuilder.setCharAt(i, gLtr);
+                matched[i] = true;
             }
         }
 
-        return hint;
+        // Loop through, set all characters that are in the word, but are in
+        // the wrong place
+        for (int i = 0; i < targetWord.length(); i++) {
+            // The characters we want to work with
+            char gLtr = guess.charAt(i);
+            char tLtr = targetWord.charAt(i);
+
+            // Get the posiion in the target wod of this character
+            int occurance = targetWord.indexOf(gLtr);
+            occurance = (occurance >= 0) ? occurance : i;
+
+            // Get all the positions of this character in the target word and
+            // check to see if they've all been matched
+            Integer[] indexes = getIndexesOfChar(targetWord, gLtr);
+            boolean allMatched = false;
+            int matches = 0;
+
+            for (int index: indexes) {
+                if (matched[index]) matches++;
+            }
+
+            if (matches == indexes.length && indexes.length > 0) {
+                allMatched = true;
+            } 
+
+            // If this character isn't in the right position, but does appear
+            // in the target word at another position, and all of those other
+            // positions haven't been matched, show this character in the hint
+            // in lower case.
+            if (gLtr != tLtr && targetWord.contains("" + gLtr) && !allMatched){
+                hintBuilder.setCharAt(i, Character.toLowerCase(gLtr));
+                matched[occurance] = true;
+            }
+        }
+
+        return hintBuilder.toString();
     }
 
     /**
