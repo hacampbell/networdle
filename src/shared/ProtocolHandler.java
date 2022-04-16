@@ -20,7 +20,8 @@ public class ProtocolHandler {
     public enum ControlMessage {
         CLIENT_START_GAME,
         SERVER_START_GAME_RESPONSE,
-        SERVER_END_GAME
+        SERVER_END_GAME,
+        SERVER_INVALID_GUESS,
     }
 
     /**
@@ -73,23 +74,31 @@ public class ProtocolHandler {
      * Checks that a given control message for the game is valid. For example,
      * that the client sent a valid START GAME message, or that that the server
      * sent a valid GAME OVER message.
-     * @param msg - The message sent by the client
-     * @param ctl - The type of control message to check
+     * @param m - The message sent by the client
+     * @param c - The type of control message to check
      * @return
      */
-    public static boolean isValidControlMessage (byte[] msg, ControlMessage ctl) {
-        switch (ctl) {
+    public static boolean isValidControlMessage (byte[] m, ControlMessage c) {
+        switch (c) {
+            // Checks for valid START GAME from client
             case CLIENT_START_GAME:
-                return isValidProtocolMessage(msg) 
-                        && decodeMessage(msg).equals(START_GAME);
+                return isValidProtocolMessage(m) 
+                        && decodeMessage(m).equals(START_GAME);
 
+            // Checks for valid '_____' response from server to new game
             case SERVER_START_GAME_RESPONSE:
-                return isValidProtocolMessage(msg)
-                        && decodeMessage(msg).equals(START_RESPONSE); 
+                return isValidProtocolMessage(m)
+                        && decodeMessage(m).equals(START_RESPONSE); 
 
+            // Checks for valid GAME OVER message from server
             case SERVER_END_GAME:
-                return isValidProtocolMessage(msg) 
-                        && decodeMessage(msg).equals(END_GAME);
+                return isValidProtocolMessage(m) 
+                        && decodeMessage(m).equals(END_GAME); 
+
+            // Checks for valid INVALID GUESS from server
+            case SERVER_INVALID_GUESS:
+                return isValidProtocolMessage(m)
+                        && decodeMessage(m).equals(INVALID_GUESS);
             
             default:
                 return false;
