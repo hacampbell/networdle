@@ -53,6 +53,23 @@ public class Client {
             byte[] resp = readMessage(connection);
             String data = ProtocolHandler.decodeMessage(resp);
             System.out.println(data);
+
+            // Check if the server sent us a number. If so, we know the game's
+            // over and that we need to read again to check for the game over
+            // message
+            if (isNumber(data)) {
+                byte[] endResp = readMessage(connection);
+                String endRespStr = ProtocolHandler.decodeMessage(endResp);
+
+                if (ProtocolHandler.isValidControlMessage(endResp, ControlMessage.SERVER_END_GAME)) {
+                    System.out.println(endRespStr);
+                } else {
+                    Utils.error("Server sent invalid GAME OVER message.");
+                }
+
+                // We're done with the game - break out of the loop.
+                gameActive = false;
+            }
         }
 
         // Disconnect when we're done, close the scanner
@@ -185,5 +202,23 @@ public class Client {
      */
     private static boolean isValidServerInit (byte[] msg) {
         return ProtocolHandler.isValidControlMessage(msg, ControlMessage.SERVER_START_GAME_RESPONSE);
+    }
+
+    /**
+     * Checks is a string is a number. That is, checks if it can be parsed to
+     * an integer without causing an error.
+     * @param str - The string to check if it is a number
+     * @return - True if the string is a number, otherwise false.
+     */
+    private static boolean isNumber (String str) {
+        if (str == null) return false;
+
+        try {
+            int num = Integer.parseInt(str);
+        } catch (Exception e) {
+            return false;
+        }
+
+        return true;
     }
 }

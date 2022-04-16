@@ -322,7 +322,8 @@ public class NetwordleGame extends Thread{
 
         // Check if the user got the correct word
         if (guess.equals(this.targetWord)) {
-            writeMessage(this.guessCount.toString() + "\n" + ProtocolHandler.END_GAME);
+            writeMessage(this.guessCount.toString());
+            writeMessage(ProtocolHandler.END_GAME);
             Utils.info(
                 this.cAddress + " correctly guessed the target word after " +
                 this.guessCount + " guesses. \n\tDisconnecting client."
