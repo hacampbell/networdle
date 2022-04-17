@@ -12,3 +12,5 @@ A networked implementation of Wordle using TCP Sockets and a custom protocol.
 - Ensure that startClient.sh has execution access
 - Run `./startClient HOST PORT` where `HOST` is the host address of the server that you just started, and `PORT` is the port number you started the server on.
     - E.g. `./startClient.sh 127.0.0.1 53044`
+
+Once finished, you can run `cleanup.sh` to remove the files created during compilation.
