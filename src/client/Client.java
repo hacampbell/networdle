@@ -15,60 +15,71 @@ public class Client {
     private static final int MAX_BYTES = 256;
 
     public static void main(String[] args) {
-        // Check that we've been given the right arguments
-        checkArgs(args);
+        checkArgs(args); // Check that we've been given the right args
 
-        boolean gameActive = true;
-        //boolean serverResponse = false;
+        boolean gameActive = true;               // Controls main game loop
+        String address = args[0];                // The host address
+        int port = processPort(args[1]);         // The host port
+        Scanner input = new Scanner(System.in);  // Used for user input
 
-        // Set address and port
-        String address = args[0];
-        int port = processPort(args[1]);
-
-        // Setup scanner to read user input.
-        Scanner input = new Scanner(System.in);
-
-        // Connect to the server
+        // Connect to the server and send START GAME message
         Socket connection = connectToServer(address, port);
-
-        // Send message to start the game.
         writeMessage(ProtocolHandler.START_GAME, connection);
 
-        // Check that the server responds correctly to a new game bring started
+        // Check that the server responds correctly to a new game being started
         byte[] initMessage = readMessage(connection);
+
         if (isValidServerInit(initMessage)) {
             gameActive = true;
-            System.out.println(ProtocolHandler.decodeMessage(initMessage));
+            System.out.println("Hint: " + 
+                                ProtocolHandler.decodeMessage(initMessage));
         } else {
             Utils.error("Invalid game init from server.");
         }
 
         // Main game loop
         while (gameActive) {
-            // Read data from client input
+            // Read the clients guess and send it to the server
+            System.out.print("Enter a guess: ");
             String message = input.nextLine();
             writeMessage(message, connection);
 
             // Read response from server
             byte[] resp = readMessage(connection);
             String data = ProtocolHandler.decodeMessage(resp);
-            System.out.println(data);
+
+            // Check we got a valid response from the server to our guess
+            if (!isValidGuessResponse(resp)) {
+                Utils.error("Invalid response received from server");
+                gameActive = false;
+            }
 
             // Check if the server sent us a number. If so, we know the game's
-            // over and that we need to read again to check for the game over
-            // message
+            // over and we need to do do a few special things.
             if (isNumber(data)) {
+                // Read again to check for a valid GAME OVER message
                 byte[] endResp = readMessage(connection);
                 String endRespStr = ProtocolHandler.decodeMessage(endResp);
 
-                if (ProtocolHandler.isValidControlMessage(endResp, ControlMessage.SERVER_END_GAME)) {
-                    System.out.println(endRespStr);
+                // If the server sent a valid GAME OVER message, show the user
+                // The number of guesses it took them to get the target word.
+                if (ProtocolHandler.isValidControlMessage(endResp, 
+                                            ControlMessage.SERVER_END_GAME)) {
+                    System.out.printf("%s %s %s\n",
+                        "Well done! You successfully guessed the word in",
+                        data,
+                        "guesses."
+                    );
                 } else {
                     Utils.error("Server sent invalid GAME OVER message.");
                 }
 
-                // We're done with the game - break out of the loop.
+                // We're done with the game - break out of the main loop.
                 gameActive = false;
+            } else {
+                // If we received a valid guess response but didn't guess the
+                // target word, display the hint the server sent back.
+                System.out.println("Hint: " + data);   
             }
         }
 
@@ -187,7 +198,7 @@ public class Client {
             return trimmedData;
         } catch (IOException e) {
             // Display the error and then close the associated client
-            Utils.error("Error reading message rom server", e);
+            Utils.error("Error reading message from server", e);
             disconnectFromServer(conn);
         }
 
@@ -201,7 +212,8 @@ public class Client {
      * @return
      */
     private static boolean isValidServerInit (byte[] msg) {
-        return ProtocolHandler.isValidControlMessage(msg, ControlMessage.SERVER_START_GAME_RESPONSE);
+        return ProtocolHandler.isValidControlMessage(msg, 
+                                    ControlMessage.SERVER_START_GAME_RESPONSE);
     }
 
     /**
@@ -220,5 +232,23 @@ public class Client {
         }
 
         return true;
+    }
+
+    private static boolean isValidGuessResponse (byte[] resp) {
+        boolean valid = true;
+        String decoded = ProtocolHandler.decodeMessage(resp);
+
+        // Check the message was sent using the protocol
+        if (!ProtocolHandler.isValidProtocolMessage(resp)) valid = false;
+
+        // Check we've been given an INVALID GUESS message, a hint messgae,
+        // or a number of guesses.
+        if (!(ProtocolHandler.isValidControlMessage(resp, 
+                                ControlMessage.SERVER_INVALID_GUESS)
+            || decoded.matches("^[a-zA-Z0-9_]+$")
+            || isNumber(decoded)
+        )) valid = false; 
+
+        return valid;
     }
 }
