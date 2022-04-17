@@ -14,6 +14,10 @@ public class Client {
 
     private static final int MAX_BYTES = 256;
 
+    /**************************************************************************
+     * Main driver function of the program.
+     * @param args - Command line arguments
+     *************************************************************************/
     public static void main(String[] args) {
         checkArgs(args); // Check that we've been given the right args
 
@@ -88,11 +92,12 @@ public class Client {
         disconnectFromServer(connection);
     }
 
-    /**
+
+    /**************************************************************************
      * Checks that the program has been given the right amount of arguments in
      * order to run. Terminates the program if this is not the case.
      * @param args - The command line arguments given to the program
-     */
+     *************************************************************************/
     private static void checkArgs (String[] args) {
         // Check we've been given at least two arguments from the command line
         if (args.length < 2) {
@@ -100,14 +105,15 @@ public class Client {
                         "./startClient {address} {port number}");
         }
     }
+    
 
-    /**
+    /**************************************************************************
      * Checks that a valid number has been given to be used as the port to
      * connect to the server with. Terminates the program if this is not the
      * case.
      * @param s - The string to be converted to a port number
      * @return - A valid int to use as a port number
-     */
+     *************************************************************************/
     private static int processPort (String s) {
         int port = 0;
 
@@ -122,12 +128,13 @@ public class Client {
         return port;
     }
 
-    /**
+
+    /**************************************************************************
      * Connects to to a server at a given address and port.
      * @param address - The address of the host to connect to
      * @param port - The port of the host to connect to
      * @return - A socket which is the connection to the given host
-     */
+     *************************************************************************/
     private static Socket connectToServer (String address, int port) {
         Socket conn = null;
 
@@ -144,10 +151,11 @@ public class Client {
         return conn;
     }
 
-    /**
+
+    /**************************************************************************
      * Closes the connection to the server
      * @param conn - The socket connection to the server
-     */
+     *************************************************************************/
     private static void disconnectFromServer (Socket conn) {
         try {
             conn.close();
@@ -159,11 +167,12 @@ public class Client {
         }
     }
 
-    /**
+
+    /**************************************************************************
      * Sends a protocol compliant message to the server.
      * @param message - The message to send to the server
      * @param conn = The connection to the server
-     */
+     *************************************************************************/
     private static void writeMessage (String message, Socket conn) {
         try {
             OutputStream cOS = conn.getOutputStream();
@@ -176,13 +185,14 @@ public class Client {
         }  
     }
 
-    /**
+
+    /**************************************************************************
      * Reads messages from the server and returns them as a byte array.
      * Because data is sent over the network as an array of bytes, this
      * function trims the data down into just what was intended to be sent by
      * the server.
      * @return - The message from the client as an array of bytes
-     */
+     *************************************************************************/
     private static byte[] readMessage (Socket conn) {
         try {
             InputStream stream = conn.getInputStream();
@@ -205,23 +215,25 @@ public class Client {
         return null;
     }
 
-    /**
+
+    /**************************************************************************
      * Checks that the first message sent by the server to the client is valid
      * by the rules of the networdle protocol. I.e. The first 
      * @param msg
      * @return
-     */
+     *************************************************************************/
     private static boolean isValidServerInit (byte[] msg) {
         return ProtocolHandler.isValidControlMessage(msg, 
                                     ControlMessage.SERVER_START_GAME_RESPONSE);
     }
 
-    /**
+
+    /**************************************************************************
      * Checks is a string is a number. That is, checks if it can be parsed to
      * an integer without causing an error.
      * @param str - The string to check if it is a number
      * @return - True if the string is a number, otherwise false.
-     */
+     *************************************************************************/
     private static boolean isNumber (String str) {
         if (str == null) return false;
 
@@ -234,6 +246,15 @@ public class Client {
         return true;
     }
 
+
+    /**************************************************************************
+     * Checks if a given response to the user sending a guess to the server is
+     * valid. That is, that the server responds with either an INVALID GUESS
+     * message, a valid hint, or the number of guesses it took for the client
+     * to guess the target word.
+     * @param resp - The response to check for validity
+     * @return - True if a valid response was received, otherwise false
+     *************************************************************************/
     private static boolean isValidGuessResponse (byte[] resp) {
         boolean valid = true;
         String decoded = ProtocolHandler.decodeMessage(resp);

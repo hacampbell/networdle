@@ -3,14 +3,14 @@ package src.server;
 import src.shared.Utils;
 
 public class Entrypoint {
-    /**
+    /**************************************************************************
      * Processes the command line arguments given to the server. That is,
      * ensures that a valid port has been given. If no valid port has been
      * given, the program will exit.
      * 
      * @param args - The command line arguments given to the program
      * @return A port number for the server o be opened on
-     */
+     *************************************************************************/
     private static int processPort (String[] args) {
         int port = 0;
 
@@ -31,10 +31,11 @@ public class Entrypoint {
         return port;
     }
 
-    /**
+
+    /**************************************************************************
      * Main entry point for the server application.
      * @param args - The command line arguments given to the program.
-     */
+     *************************************************************************/
     public static void main(String[] args) {
         int port = processPort(args);
         Server server = new Server(port);

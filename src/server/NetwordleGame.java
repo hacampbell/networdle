@@ -26,10 +26,10 @@ public class NetwordleGame extends Thread{
     private Integer guessCount;         // The clients number fo guesses
     private HashSet<String> guessList;  // The list of valid guesses to be made
 
-    /**
+    /************************************************************************
      * Constructor for the NetWordleGame class.
      * @param client - The client the game has been created for
-     */
+     ***********************************************************************/
     public NetwordleGame (Socket client) {
         this.client = client;
         this.cAddress = client.getLocalSocketAddress().toString();
@@ -41,9 +41,10 @@ public class NetwordleGame extends Thread{
                     + targetWord);
     }
 
-    /**
+
+    /**************************************************************************
      * Main entry point for a Networdle Game. 
-     */
+     *************************************************************************/
     public void run () {
         try {
             // Check that we're sent a START GAME message from the client
@@ -78,12 +79,13 @@ public class NetwordleGame extends Thread{
         }
     }
 
-    /**
+
+    /**************************************************************************
      * Selects and returns a random word from the target words files. In the
      * case that an error occurs trying to read the file, the generic word
      * 'apple' will be returned so that the program can continue.
      * @return
-     */
+     *************************************************************************/
     private String selectTargetWord () {
         final String targetPath = "./resources/target.txt";
         String target = "APPLE"; // Generic word in case reading the file fails
@@ -110,11 +112,12 @@ public class NetwordleGame extends Thread{
         return target; 
     }
 
-    /**
+
+    /**************************************************************************
      * Gets the list of valid guesses a client can make and returns it as a
      * hasset for fast lookup.
      * @return - A hashset containing the valid guesses a client can make.
-     */
+     *************************************************************************/
     private HashSet<String> loadGuessList () {
         final String targetPath = "./resources/guess.txt";
         HashSet<String> guessList = new HashSet<String>();
@@ -133,10 +136,11 @@ public class NetwordleGame extends Thread{
         return guessList;
     }
 
-    /**
+
+    /**************************************************************************
      * Wrapper function for closing the client socket and setting the game
      * state to inactive.
-     */
+     *************************************************************************/
     private void closeClient () {
         try {
             this.client.close();
@@ -147,10 +151,11 @@ public class NetwordleGame extends Thread{
         }
     }
 
-    /**
+
+    /**************************************************************************
      * Sends a protocol compliant message to the client.
      * @param message - The message to send to the client
-     */
+     *************************************************************************/
     private void writeMessage (String message) {
         try {
             OutputStream cOS = client.getOutputStream();
@@ -166,13 +171,14 @@ public class NetwordleGame extends Thread{
         }  
     }
 
-    /**
+
+    /**************************************************************************
      * Reads messages from the client and returns them as a byte array.
      * Because data is sent over the network as an array of bytes, this
      * function trims the data down into just what was intended to be sent by
      * the client.
      * @return - The message from the client as an array of bytes
-     */
+     *************************************************************************/
     private byte[] readMessage () {
         try {
             InputStream stream = client.getInputStream();
@@ -198,22 +204,24 @@ public class NetwordleGame extends Thread{
         return null;
     }
 
-    /**
+
+    /**************************************************************************
      * Checks if a word guess is valid. That is, checks if a given guess is
      * contained in the guess list.
      * @param guess - The guess to check for validity
      * @return - True if the guess is in the guess list, otherwise false.
-     */
+     *************************************************************************/
     private boolean isValidGuess (String guess) {
         return guessList.contains(guess);
     }
 
-    /**
+
+    /**************************************************************************
      * Gets the indexes of all occurances of a character in a string
      * @param word - The word to get the char indexes from
      * @param ch - The char to get the indexes of
      * @return - An array containing the index of the char occurances
-     */
+     *************************************************************************/
     private Integer[] getIndexesOfChar (String word, char ch) {
         ArrayList<Integer> indexes = new ArrayList<Integer>();
 
@@ -228,11 +236,12 @@ public class NetwordleGame extends Thread{
         return data;
     }
 
-    /**
+
+    /**************************************************************************
      * Generates a new hint for a given guess
      * @param guess - The guess to generate a hint for
      * @return - The hint for a given guess
-     */
+     *************************************************************************/
     private String generateHint (String guess) {
         StringBuilder hintBuilder = new StringBuilder(targetWord.length());
         boolean[] matched = new boolean[targetWord.length()];
@@ -288,11 +297,12 @@ public class NetwordleGame extends Thread{
 
         return hintBuilder.toString();
     }
+    
 
-    /**
+    /**************************************************************************
      * The main function for managing the game and guesses made by the client.
      * @param message - The message sent to the server by the client
-     */
+     *************************************************************************/
     private void checkGuess (byte[] message) {
         // Check that the message the client sent adheres to the protocol. If
         // not, drop the client.
