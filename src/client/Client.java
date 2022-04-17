@@ -41,50 +41,55 @@ public class Client {
             Utils.error("Invalid game init from server.");
         }
 
-        // Main game loop
-        while (gameActive) {
-            // Read the clients guess and send it to the server
-            System.out.print("Enter a guess: ");
-            String message = input.nextLine();
-            writeMessage(message, connection);
+        try {
+            // Main game loop
+            while (gameActive) {
+                // Read the clients guess and send it to the server
+                System.out.print("Enter a guess: ");
+                String message = input.nextLine();
+                writeMessage(message, connection);
 
-            // Read response from server
-            byte[] resp = readMessage(connection);
-            String data = ProtocolHandler.decodeMessage(resp);
+                // Read response from server
+                byte[] resp = readMessage(connection);
+                String data = ProtocolHandler.decodeMessage(resp);
 
-            // Check we got a valid response from the server to our guess
-            if (!isValidGuessResponse(resp)) {
-                Utils.error("Invalid response received from server");
-                gameActive = false;
-            }
-
-            // Check if the server sent us a number. If so, we know the game's
-            // over and we need to do do a few special things.
-            if (isNumber(data)) {
-                // Read again to check for a valid GAME OVER message
-                byte[] endResp = readMessage(connection);
-                String endRespStr = ProtocolHandler.decodeMessage(endResp);
-
-                // If the server sent a valid GAME OVER message, show the user
-                // The number of guesses it took them to get the target word.
-                if (ProtocolHandler.isValidControlMessage(endResp, 
-                                            ControlMessage.SERVER_END_GAME)) {
-                    System.out.printf("%s %s %s\n",
-                        "Well done! You successfully guessed the word in",
-                        data,
-                        "guesses."
-                    );
-                } else {
-                    Utils.error("Server sent invalid GAME OVER message.");
+                // Check we got a valid response from the server to our guess
+                if (!isValidGuessResponse(resp)) {
+                    Utils.error("Invalid response received from server");
+                    gameActive = false;
                 }
 
-                // We're done with the game - break out of the main loop.
-                gameActive = false;
-            } else {
-                // If we received a valid guess response but didn't guess the
-                // target word, display the hint the server sent back.
-                System.out.println("Hint: " + data);   
+                // Check if the server sent us a number. If so, we know the
+                // games's over and we need to do do a few special things.
+                if (isNumber(data)) {
+                    // Read again to check for a valid GAME OVER message
+                    byte[] endResp = readMessage(connection);
+                    String endRespStr = ProtocolHandler.decodeMessage(endResp);
+
+                    // If the server sent a valid GAME OVER message, show the
+                    // user the number of guesses it took them to get the
+                    // target word
+                    if (ProtocolHandler.isValidControlMessage(endResp, 
+                                            ControlMessage.SERVER_END_GAME)) {
+                        System.out.printf("%s %s %s\n",
+                            "Well done! You successfully guessed the word in",
+                            data,
+                            "guesses."
+                        );
+                    } else {
+                        Utils.error("Server sent invalid GAME OVER message.");
+                    }
+
+                    // We're done with the game - break out of the main loop.
+                    gameActive = false;
+                } else {
+                    // If we received a valid guess response but didn't guess
+                    // the target word, display the hint the server sent back.
+                    System.out.println("Hint: " + data);   
+                }
             }
+        } catch (Exception e) {
+            Utils.error("An error occured during execution. Game dropped.");
         }
 
         // Disconnect when we're done, close the scanner

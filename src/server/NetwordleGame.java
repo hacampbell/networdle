@@ -72,9 +72,8 @@ public class NetwordleGame extends Thread{
             }
 
         } catch (Exception e) {
-            // If there's an error, display it and kill the client.
-            Utils.error("An error occured during execution for client: " +
-                        cAddress, e);
+            // If there's an error, drop the client.
+            Utils.error("Dropped client " + cAddress);
             closeClient();
         }
     }
@@ -297,7 +296,7 @@ public class NetwordleGame extends Thread{
 
         return hintBuilder.toString();
     }
-    
+
 
     /**************************************************************************
      * The main function for managing the game and guesses made by the client.
